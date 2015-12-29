@@ -51,7 +51,7 @@ function init()
 		<tr><td width=1> \
 		<input type=submit onclick=\"ShowHideEvent( 'SystemStatus' ); SystemInfoTick();\" value='System Status' id=SystemStatusClicker></td><td> \
 		<div id=SystemStatus class='collapsible'> \
-		<table width=100% border=1><tr><td> \
+		<table width=100% border=0><tr><td> \
 <div id=output></div><div id=systemsettings></div> \n		</td></tr></table></div></td></tr>" );
 
 	$('#MainMenu > tbody:last-child').after( "\
@@ -78,7 +78,12 @@ function init()
 		<div id=CustomCommand class=\"collapsible\"> \
 		<table width=100% border=1><tr><td> \
 		Command: <input type=text id=custom_command> \
-		<input type=submit value=\"Submit\" onclick=\"IssueCustomCommand()\"><br> \
+		<input type=submit value=\"Send\" onclick=\"IssueCustomCommand()\"><br> \
+		<input type=checkbox value=\"demo\" id=\"demo\"><br> \
+		<input type=submit value=\"A\" onclick=\"SendDirection('cv1')\"><br> \
+		<input type=submit value=\"B\" onclick=\"SendDirection('cb1')\"><br> \
+		<input type=submit value=\"Start\" onclick=\"SendDirection('cn1')\"><br> \
+		<input type=submit value=\"Select\" onclick=\"SendDirection('cm1')\"><br> \
 		<textarea id=custom_command_response readonly rows=15 cols=80></textarea> \
 		</td></tr></table></td></tr> \
 		 \
@@ -132,6 +137,39 @@ function init()
 	KickWifiTicker();
 	GPIODataTickerStart();
 	InitSystemTicker();
+
+	
+	$(document).keydown(function(event) {
+		console.log(event);
+		if (event.which==37) {
+			SendButton('cw1');
+			event.preventDefault();
+		}
+		
+		if (event.which==38) {
+			SendButton('ca1');
+			event.preventDefault();
+		}
+		
+		if (event.which==39) {
+			SendButton('cs1');
+			event.preventDefault();
+		}
+		
+		if (event.which==40) {
+			SendButton('cd1');
+			event.preventDefault();
+		}
+
+	});
+
+	setInterval(function() { 
+		if ($("#demo").prop("checked")){
+			var randomCommands=["cw1","ca1","cs1","cd1"];
+			var randomNumber = Math.floor(randomCommands.length*Math.random());
+			SendButton(randomCommands[randomNumber]);
+		}
+	}, 1000);
 
 	console.log( "Load complete.\n" );
 	Ticker();
@@ -279,12 +317,10 @@ function IssueCustomCommand()
 }
 
 
-
-
-
-
-
-
+function SendButton( button_name )
+{
+	QueueOperation( button_name, function( req,data) { $("#custom_command_response").val( data ); } );
+}
 
 
 function MakeDragDrop( divname, callback )
